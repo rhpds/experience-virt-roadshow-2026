@@ -32,18 +32,19 @@ These are the *seven* main sections that will be covered:
 
 * _Template and InstanceType Management_: In order to streamline deployment of virtual machines, administrators will often create Templates or define InstanceTypes to ease deployment operations. This section will focus on those processes.
 
+* _Network Management_: By default VMs are connected to the pod network in OpenShift. In this section we will explore creating new L2 network mappings as well as making use of user defined networks (UDN) for direct network connectivity.
+
 * _Working with Virtual Machines and Applications_: In this section we will perform some day-2 activities with our imported virtual machines, by exposing our VM hosted applications through services and routes.
 
-* _Network Management_: By default VMs are connected to the pod network in OpenShift. In this section we will explore creating new L2 network mappings as well as making use of user defined networks (UDN) for direct network connectivity.
 
 == Version Information
 
 This edition of the  OpenShift Virtualization Roadshow has been developed using the following software versions:
 
-* Red Hat OpenShift 4.18.20
-* Red Hat OpenShift Virtualization 4.18.8
-* Red Hat OpenShift Data Foundation 4.18.6
-* Red Hat Openshift API for Data Protection (OADP) 1.4.5
-* Red Hat Migration Toolkit for Virtual Machines 2.8.5
+* Red Hat OpenShift 4.21.5
+* Red Hat OpenShift Virtualization 4.21.1
+* Red Hat OpenShift Data Foundation 4.20.7
+* Red Hat Openshift API for Data Protection (OADP) 1.5.5
+* Red Hat Migration Toolkit for Virtual Machines 2.11
 
-(Accurate as of August 7, 2025)
+(Accurate as of March 20, 2026)
