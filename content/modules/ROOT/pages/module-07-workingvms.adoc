@@ -176,12 +176,14 @@ To begin, we'll add labels to the virtual machines by modifying their definition
 +
 image::2026_spring/module-07-workingvms/15_Staged_VMs_List.png[link=self, window=blank, width=100%]
 
-. Select to the *winweb01-{user}* VM and navigate to the *YAML* tab.
-. Find the *spec:* section and under the *template.metadata* add the following to the *labels* section:
+. Select to the *winweb01* VM and navigate to the *YAML* tab.
+. Find the *spec:* section and under the *template.metadata* use the following syntax to add labels to the VM:
 +
 [source,yaml,role=execute]
 ----
-env: webapp
+labels:
+  app: winweb01
+  env: webapp
 ----
 +
 IMPORTANT: Make sure to get the indentation exactly right - just like in the screenshot below.
@@ -189,14 +191,22 @@ IMPORTANT: Make sure to get the indentation exactly right - just like in the scr
 image::2026_spring/module-07-workingvms/16_Staged_VMs_YAML.png[link=self, window=blank, width=100%]
 
 . Click the *Save* button, and you will be prompted that the VM has been updated to a new version number.
-. *Repeat* the process for the VM *winweb02-{user}*.
-. After completing the configuration change, reboot both *winweb01-{user}* and *winweb02-{user}*.
+. *Repeat* the process for the VM *winweb02* using the following syntax:
++
+[source,yaml,role=execute]
+----
+labels:
+  app: winweb02
+  env: webapp
+----
++
+. After completing the configuration change, reboot both *winweb01* and *winweb02*.
 +
 NOTE: Ensure the VMs are properly working by accessing to the console tab of each VM.
 
 === Create the Service
 
-. In the left-side menu expand *Networking* and click on *Services*. On the screen that loads, click the *Create Service* button in the corner.
+. In the left-side menu expand *Networking* and click on *Services*. On the screen that loads, click the *Create Service* button in the center of the page.
 +
 image::2026_spring/module-07-workingvms/17_Navigate_Service.png[link=self, window=blank, width=100%]
 
@@ -208,7 +218,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: webapp
-  namespace: vmexamples-{user}
+  namespace: vmimported-{user}
 spec:
   selector:
     env: webapp
@@ -231,7 +241,7 @@ image::2026_spring/module-07-workingvms/20_Imported_VMs_Pods.png[link=self, wind
 
 === Create the Route
 
-Now the Windows IIS servers are accessible from within the OpenShift cluster. Other virtual machines are able to access them using the DNS name **webapp.vmexamples-{user}**, which is determined by the name of the service + the namespace. However, since these web servers are the front end to an application, we want it to be externally accessible. This will be done by exposing it publicly using a *Route*.
+Now the Windows IIS servers are accessible from within the OpenShift cluster. Other virtual machines are able to access them using the DNS name **webapp.vmimported-{user}**, which is determined by the name of the service + the namespace. However, since these web servers are the front end to an application, we want it to be externally accessible. This will be done by exposing it publicly using a *Route*.
 
 . Under *Networking* now click on the *Routes* option in the left navigation menu.  Click the *Create Route* button in the center of the screen.
 +
@@ -256,8 +266,7 @@ image::2026_spring/module-07-workingvms/23_Route_Access.png[link=self, window=bl
 +
 image::2026_spring/module-07-workingvms/24_WebApp_Error.png[link=self, window=blank, width=100%]
 
-
-. To address our connectivity issue, we will need to create a service for the *database-{user}* VM as well so that it can be accessed by the web servers.
+. To address our connectivity issue, we will need to create a service for the *database* VM as well so that it can be accessed by the web servers.
 
 . Once again, navigate to *Networking* -> *Services* and press the *Create Service* button. Replace the YAML with the following definition:
 +
@@ -267,10 +276,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: database
-  namespace: vmexamples-{user}
+  namespace: vmimported-{user}
 spec:
   selector:
-    vm.kubevirt.io/name: database-{user}
+    vm.kubevirt.io/name: database
   ports:
   - protocol: TCP
     port: 3306
@@ -288,11 +297,11 @@ image::2026_spring/module-07-workingvms/26_WebApp_Success.png[link=self, window=
 . Refresh the screen a couple of times, you should see which webserver is responding, and that the count of user accesses rises with each refresh.
 . Return to your OpenShift console, and click on *Virtualization -> VirtualMachines* and shut down the web server that is handling your requests.
 +
-image::2026_spring/module-07-workingvms/27_WinWeb01_Shutdown.png[link=self, window=blank, width=100%]
+image::2026_spring/module-07-workingvms/27_WinWeb02_Shutdown.png[link=self, window=blank, width=100%]
 
 . Return to your tab with the open WebApp URL and refresh the screen. You should see the remaining web server start returning requests, and the count continue to rise with each refresh. Configuring the service to load balance between two virtual web servers is shown to be successful.
 +
-image::2026_spring/module-07-workingvms/28_WinWeb02_Online.png[link=self, window=blank, width=100%]
+image::2026_spring/module-07-workingvms/28_WinWeb01_Online.png[link=self, window=blank, width=100%]
 +
 NOTE: While this is a simple example, keep in mind that there are a number of ways to configure load balancing services between virtual machines in OpenShift to meet the needs of your application. 
 
