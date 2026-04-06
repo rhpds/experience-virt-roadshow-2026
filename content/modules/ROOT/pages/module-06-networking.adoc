@@ -94,7 +94,7 @@ image::2026_spring/module-06-networking/07_NetworkAttachDefinition_Create_Form.p
 
 NOTE: The form above has an input for *VLAN Tag Number*, which is used when connecting to a network that needs to have a VLAN tag assigned. This lab uses an untagged network, so no VLAN number is required here.
 +
-NOTE: A single Linux bridge on the host can have many different VLANs associated with it. In this scenario, you only need to create a Network Attachment Definition for each one, not a separate host interface and bridge.
+NOTE: A single OVS or Linux bridge on the host can have many different VLANs associated with it. In this scenario, you only need to create a Network Attachment Definition for each one, not a separate host interface and bridge.
 
 . Examine the details of the network attachment definition. Because this was created in the *vmexamples-{user}* project, it will not be available in other projects.
 +
@@ -164,7 +164,6 @@ You must consider the following limitations before implementing a primary UDN:
 
 . You cannot define readiness and liveness probes to configure VM health checks.
 
-NOTE: OpenShift Virtualization currently does not support secondary user-defined networks.
 
 === Working with User Defined Networks
 
@@ -185,94 +184,32 @@ image::2026_spring/module-06-networking/16_UDN_Form.png[link=self, window=blank,
 image::2026_spring/module-06-networking/17_UDN_Created.png[link=self, window=blank, width=100%]
 +
 * The Default name when it's created using the form is *primary-udn*.
-* By default is Layer 2 (the only Layer supported at this moment for OpenShift Virtualization).
-* The Role is primary (Virtual Machines can only use, at this moment, primary networks).
+* By default the Network Topology is Layer 2 (Currently only Layer 2 and LocalNet are supported for OpenShift Virtualization).
+* The Role is primary.
 * A Network Attachment Definition is created automatically.
 
 . Now navigate to *Networking -> NetworkAttachmentDefinitions* on the left-side menu and see that the associated NAD has been automatically created.
 +
 image::2026_spring/module-06-networking/18_UDN_NAD.png[link=self, window=blank, width=100%]
 
-. Creating a Virtual Machine attached to a UserDefinedNetwork requires some https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/virtualization/networking#virt-connecting-vm-to-primary-udn[adjustment in the YAML definition^]. For this lab to make the task easier, we are just going to define the whole VM connected to the UserDefinedNetwork using the YAML definition below:
+. Creating a Virtual Machine that is attached to a Primary UserDefinedNetwork is as simple as creating a machine from a template or instancetype in the project where the primary UDN is defined. The UDN replaces the default (pod) network as found in other projects that are not enabled for UDN support. To test this, lets create one now.
 
-. You can use the top menu to import a YAML as is shown in the following image:
+. Click on *Virtualization -> VirtualMachines* in the left-side navigation menu, select the *vmexamples-{user}-udn* project, click the *Create VirtualMachine* button, and select *From InstanceType* from the dropdown menu.
 +
-image::2026_spring/module-06-networking/19_UDN_Import_YAML.png[link=self, window=blank, width=100%]
-+
-[source,yaml,role=execute,subs="attributes"]
-----
-apiVersion: kubevirt.io/v1
-kind: VirtualMachine
-metadata:
-  labels:
-    kubevirt.io/vm: fedora-udn
-  name: fedora-udn
-  namespace: vmexamples-{user}-udn
-spec:
-  dataVolumeTemplates:
-    - apiVersion: cdi.kubevirt.io/v1beta1
-      kind: DataVolume
-      metadata:
-        creationTimestamp: null
-        name: fedora-udn
-      spec:
-        sourceRef:
-          kind: DataSource
-          name: fedora
-          namespace: openshift-virtualization-os-images
-        storage:
-          resources:
-            requests:
-              storage: 30Gi
-  runStrategy: Always
-  template:
-    metadata:
-      name: fedora-udn
-      namespace: vmexamples-{user}-udn
-    spec:
-      domain:
-        devices:
-          disks:
-          - disk:
-              bus: virtio
-            name: rootdisk
-          - disk:
-              bus: virtio
-            name: cloudinitdisk
-          interfaces:
-          - name: primary-udn
-            binding:
-              name: l2bridge
-          rng: {}
-        resources:
-          requests:
-            memory: 2048M
-      networks:
-      - pod: {}
-        name: primary-udn
-      terminationGracePeriodSeconds: 0
-      volumes:
-      - dataVolume:
-          name: fedora-udn
-        name: rootdisk
-      - cloudInitNoCloud:
-          userData: |-
-            #cloud-config
-            user: fedora
-            password: fedora
-            chpasswd: { expire: False }
-        name: cloudinitdisk
-----
+image::2026_spring/module-06-networking/19_Create_UDN_VM.png[link=self, window=blank, width=100%]
 
-. Once pasted in, you can click the blue *Create* button at the bottom to begin the VM creation process.
+. Select the *fedora* instancetype, leave all the other options as defaults, then scroll to the bottom and click the *Create VirtualMachine* button.
 +
-image::2026_spring/module-06-networking/20_Create_VM_YAML.png[link=self, window=blank, width=100%]
+image::2026_spring/module-06-networking/20a_Fedora_InstanceType.png[link=self, window=blank, width=100%]
++
+image::2026_spring/module-06-networking/20b_Create_VM.png[link=self, window=blank, width=100%]
 
-. Switch to the *VirtualMachines* and watch at the VM is created. Once it is up and runing, review the newly created *fedora-udn* virtual machine. In the *Overview* tab, the *Network* tile will show the IP assigned from the UserDefinedNetwork.
+. Switch to the *VirtualMachines* and watch at the VM is created. Once it is up and runing, review the newly created virtual machine. In the *Overview* tab, the *Network* tile will show that we are attached to the default network, but it will have an IP address assigned from the UserDefinedNetwork.
 +
 image::2026_spring/module-06-networking/21_UDN_Network_Tile.png[link=self, window=blank, width=100%]
 
-. Switch to the Console tab and login to the VM using the provided guest credentials. 
+. Switch to the Console tab and login to the VM using the provided guest credentials.
+. Ping a public website like *www.google.com* to show that we have network communication on our Primary UDN.
 +
 image::2026_spring/module-06-networking/22_UDN_Fedora_Console.png[link=self, window=blank, width=100%]
 +
@@ -285,6 +222,5 @@ image::2026_spring/module-06-networking/22_UDN_Fedora_Console.png[link=self, win
 
 In this module, you explored working with physical networks and connecting Virtual Machines (VMs) directly to an existing network. By attaching VMs directly to a physical network administrators can directly access the VMs while also enabling the VMs to connect to specialized networks, such as storage or administration networks.
 
-We also introduced User-defined networks, which provide cluster administrators and end users with highly customizable network configuration options and a much more flexible experience for managing both primary and secondary network types. 
-
+We also introduced User-defined networks, which provide cluster administrators and end users with highly customizable network configuration options and a much more flexible experience for managing both primary and secondary network types.
 
