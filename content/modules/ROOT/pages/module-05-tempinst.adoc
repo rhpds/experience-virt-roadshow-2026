@@ -59,8 +59,7 @@ image::2026_spring/module-05-tempinst/05_Clone_Details.png[link=self, window=bla
 . A new window will pop out where you can edit the amount of CPU and Memory. For our custom template set the value of CPUs to 2, and Memory to 4 GiB, and click the *Save* button.
 +
 image::2026_spring/module-05-tempinst/06_Edit_CPU_Mem.png[link=self, window=blank, width=100%]
-+
-NOTE: There is a UI bug in OpenShift Virtulization 4.21 that prevents the template from being edited at this stage. It has been reported and will be fixed soon. 
+
 . Next click on the *Scripts* tab at the top, and in the section called *Cloud-init* click the *Edit* button.
 +
 image::2026_spring/module-05-tempinst/09_Scripts_CloudInit.png[link=self, window=blank, width=100%]
@@ -92,8 +91,6 @@ image::2026_spring/module-05-tempinst/11_User_Templates.png[link=self, window=bl
 . Click on the tile and you will be prompted with the VM startup screen. Click the *Quick create VirtualMachine* button.
 +
 image::2026_spring/module-05-tempinst/12_Quick_Create_Template.png[link=self, window=blank, width=100%]
-+
-NOTE: Until the previously mentioned bug is fixed you can modify CPU and Memory on this screen prior to deploying the VM.
 
 . When the virtual machine boots you can see on the *Overview* page that it was created from our template, and has the additional resources we defined. We just need to verify that it installed *MariaDB* for us.
 +
