@@ -1,3 +1,4 @@
+= Conclusion
 
 image::2025_spring/conclusion/00_Thank_You.png[link=self, window=blank, width=100%]
 
